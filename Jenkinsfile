@@ -1,36 +1,34 @@
-pipeline { 
-    agent {
-        label 'localhost'
-    }
-    environment {
-        FLASK_APP='microblog.py'
-        FLASK_DEBUG=0
-    }
-    stages {
-        stage('Build') {
-            steps {
-                sh "ls -lh"
-            }
-        }
-        stage('Test'){
-            steps {
-                sh "echo 'prueba 2'"
-            }
-        }
-        stage('Deploy') {
-            environment {
-                MAIL_SERVER = 'smtp.mailtrap.io'
-                MAIL_PORT = '587'
-                MAIL_USE_TLS     = '1'
-                MAIL_CREDS = credentials("mail-user-and-password-secret")
-            }
-            steps {
-                createFlaskEnv()
-                sh 'docker-compose build'
-                sh 'docker-compose up -d'
-            }
-        }
-    }
+pipeline {
+   agent {
+       label "poc2"
+   }
+
+   stages {
+      stage('Obtener Codigo') {
+         steps {
+            git 'https://github.com/Tekkatron/microblog-flask-monolith.git'
+         }
+      }
+      stage('Build') {
+          environment {
+            MAIL_SERVER = 'smtp.mailtrap.io'
+            MAIL_PORT = '587'
+            MAIL_USE_TLS     = '1'
+            MAIL_CREDS = credentials("MAIL_SECRECT_VAULT")
+          }
+         steps {
+            createFlaskEnv() 
+            sh "docker build . -t gcr.io/nutresa-165613/flask-vault-example:latest" 
+            sh "docker push gcr.io/nutresa-165613/flask-vault-example:latest" 
+         }
+      }
+      stage('Despliegue') {
+         steps {
+            sh "gcloud container clusters get-credentials poc-vault --zone us-central1-a --project nutresa-165613"
+			
+         }
+      }
+   }
 }
 
 def createFlaskEnv(){
