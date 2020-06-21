@@ -25,6 +25,7 @@ pipeline {
       stage('Despliegue') {
          steps {
             sh "gcloud container clusters get-credentials poc-vault --zone us-central1-a --project nutresa-165613"
+			sh "kubectl apply -f app-deployment.yaml"
 			
          }
       }
