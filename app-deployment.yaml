@@ -19,6 +19,7 @@ spec:
     spec:
       containers:
       - image: gcr.io/nutresa-165613/flask-vault-example:latest
+        imagePullPolicy: Always
         name: flask-vault-example
         resources: {}
 status: {}
